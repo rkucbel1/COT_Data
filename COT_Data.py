@@ -1,5 +1,5 @@
 #Program reads most recent CFTC COT Commitments of Traders Report
-#Historical year (2020) is previously downloaded and appended
+#Historical year (2021) is previously downloaded and appended
 #Selected market data is filtered out
 import pandas as pd
 import requests
@@ -16,14 +16,14 @@ path_to_data = os.environ.get('PATH_TO_COT_DATA_FILES')
 print(path_to_data)
 
 #Download most recent data
-url = 'http://www.cftc.gov/files/dea/history/fut_disagg_txt_2021.zip'
+url = 'http://www.cftc.gov/files/dea/history/fut_disagg_txt_2022.zip'
 resp = requests.get(url)
 
-with open(path_to_data + '/fut_disagg_txt_2021.zip', 'wb') as foutput:
+with open(path_to_data + '/fut_disagg_txt_2022.zip', 'wb') as foutput:
    foutput.write(resp.content)
 
 #Unzip the file
-zip_file = path_to_data + '/fut_disagg_txt_2021.zip'
+zip_file = path_to_data + '/fut_disagg_txt_2022.zip'
 
 try:
     with zipfile.ZipFile(zip_file) as z:
@@ -35,18 +35,18 @@ except:
 #Historical CFTC COT Data found at:
 # https://www.cftc.gov/MarketReports/CommitmentsofTraders/HistoricalCompressed/index.htm
 data2021 = pd.read_csv(path_to_data + '/f_year.txt', usecols=[0,2,7,8,9,13,14,16,17,21,22])
-data2020 = pd.read_csv(path_to_data + '/f_year2020.txt', usecols=[0,2,7,8,9,13,14,16,17,21,22])
+data2020 = pd.read_csv(path_to_data + '/f_year2021.txt', usecols=[0,2,7,8,9,13,14,16,17,21,22])
 
 #Clean up column names into something shorter
+data2022.columns = ["Market", "Date", "OI", "Commercial Long", "Commercial Short", "Managed Long", "Managed Short", "Other Long", "Other Short", "NonRept Long", "NonRept Short"]
 data2021.columns = ["Market", "Date", "OI", "Commercial Long", "Commercial Short", "Managed Long", "Managed Short", "Other Long", "Other Short", "NonRept Long", "NonRept Short"]
-data2020.columns = ["Market", "Date", "OI", "Commercial Long", "Commercial Short", "Managed Long", "Managed Short", "Other Long", "Other Short", "NonRept Long", "NonRept Short"]
 
 #Dates read from csv as strings. Convert to datetime
+data2022['Date'] = pd.to_datetime(data2022['Date'])
 data2021['Date'] = pd.to_datetime(data2021['Date'])
-data2020['Date'] = pd.to_datetime(data2020['Date'])
 
 #Append the dataframes to each other
-dataCombined = data2021.append(data2020)
+dataCombined = data2022.append(data2021)
 
 #Filter out markets of interest
 crude = dataCombined[dataCombined.Market == 'CRUDE OIL, LIGHT SWEET - NEW YORK MERCANTILE EXCHANGE']
